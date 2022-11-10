@@ -1,0 +1,11 @@
+{
+    "Size input layer": 5,
+    "Size hiddens layer": [3],
+    "Size output layer": 1,
+    
+    "Activation Function": "relu",
+    "Last Activation Function": "sigmoid",
+
+    "Loss": "binary_crossentropy",
+    "Optimizer": "sgd"
+}
