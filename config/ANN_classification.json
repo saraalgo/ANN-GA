@@ -1,0 +1,14 @@
+{
+    "Activation Function": "relu",
+    "Last Activation Function": "sigmoid",
+
+    "Loss": "binary_crossentropy",
+    
+    "Optimizer": "sgd",  
+    "Optimizer params" : "learning_rate",
+    "Optimizer params learning_rate": 0.01,
+
+    "Verbose": 1,
+    "Epochs": 5000,
+    "Batch size": 125   
+}
