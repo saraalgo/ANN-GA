@@ -1,6 +1,0 @@
-{
-    "Manual input layer": 5,
-    "Size hiddens layer": [12,6],
-    "Binary output layer": 1,
-    "Multiclass output layer": 2
-}
