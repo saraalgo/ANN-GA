@@ -1,15 +1,19 @@
 
 params = {
     "inputfile": "../data/data.csv",
-
+    "input_name": "Data",
+    "normalize_data": True,
+    "test_size": 0.3,
+    "output_colname": "output",
+    
     "fitness_metric": "loss",
     "var_type": "real",
     "timeout": 5000
 }
 
 ga_params = {
-    "max_num_iteration": 2,
-    "population_size": 7,
+    "max_num_iteration": 4,
+    "population_size": 10,
     "mutation_probability": 0.1, 
     "elit_ratio": 0.01,
     "parents_portion": 0.3,

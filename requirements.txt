@@ -1,0 +1,7 @@
+pandas
+tensorflow
+silence_tensorflow
+sklearn
+geneticalgorithm2
+matplotlib
+seaborn

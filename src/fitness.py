@@ -1,6 +1,12 @@
 import tensorflow as tf
 
+from silence_tensorflow import silence_tensorflow
+silence_tensorflow()
+
 import pandas as pd
+import numpy as np
+import os
+from pathlib import Path
 
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
@@ -47,14 +53,13 @@ KerasOptimizers = {
     "sgd" : tf.keras.optimizers.SGD(**params_optimizer_dop)
 }
 
-
 ## Load Data
 class LoadData():
     def __init__(self,
-                inputfile,
-                output_colname = "output",
-                normalize = False,
-                test_size = 0.3):
+                inputfile = p["inputfile"],
+                output_colname = p["output_colname"],
+                normalize = p["normalize_data"],
+                test_size = p["test_size"]):
 
         # 1. Read data
         data = pd.read_csv(inputfile)
@@ -93,7 +98,6 @@ class LoadData():
 class AnnModel():
     def __init__(self,
                 X,
-                inputfile = p["inputfile"],
                 ann_p = ann_p,
                 metrics=METRICS,
                 optimizer = KerasOptimizers):
@@ -104,7 +108,7 @@ class AnnModel():
             :params: idim - number of features of the input data 
             :return: annmodel - initiate Dopamine ANN model in TF for DAM, DM or Control mode
             """
-            data = LoadData(inputfile)
+            data = LoadData()
             X_train, y_train, X_test, y_test = data.get_model_data()
             idim = X_train.shape[1]
 
@@ -127,33 +131,56 @@ class AnnModel():
             
             annmodel.compile(loss=ann_p["Loss"], optimizer=optimizer, metrics=metrics) 
             self.annmodel = annmodel
+            self.X = X
 
     
-    def predict(self, X_train, Y_train, metric = p["fitness_metric"], save=False):
-        yPred = self.annmodel.evaluate(X_train, Y_train,
+    def predict(self, X_train, y_train, metric = p["fitness_metric"], save="../results/" + p["input_name"]):
+        yPred = self.annmodel.evaluate(X_train, y_train,
                               batch_size=ann_p["Batch size"], verbose=0)
-        yPred.insert(0, Y_train.tolist())
+        yPred.insert(0, y_train.tolist())
         y_pred_prob = self.annmodel.predict(X_train, 
                                    batch_size=ann_p["Batch size"], verbose=0)
         yPred.insert(0, y_pred_prob.ravel())
         names = ['y_pred_prob','y_real']+self.annmodel.metrics_names
 
-        if save:
-            #hacer
-            pass
+        # Save metrics of only best individual in each generation
+        if not os.path.exists(save):
+            os.makedirs(save)
+            os.makedirs(save+'/tmp')
+        file_metrics = Path(save + '/tmp/metrics_tmp_best_population.npz')
+        file_metrics.touch(exist_ok=True)
+        if os.stat(file_metrics).st_size == 0:
+            np.savez(file_metrics, names, yPred)
+        else:
+            npz = np.load(file_metrics, allow_pickle=True)
+            old_metrics = list(npz.f.arr_1)
+            if metric in ["loss", "fn", "fp"]:
+                new_metrics = old_metrics if old_metrics[names.index(metric)] < yPred[names.index(metric)] else yPred
+                np.savez(file_metrics, names, new_metrics)
+            else:
+                new_metrics = old_metrics if old_metrics[names.index(metric)] > yPred[names.index(metric)] else yPred
+                np.savez(file_metrics, names,new_metrics)
             
         self.yPred = yPred
         return self.yPred[names.index(metric)]
 
+    def predict_test(self, X_test, y_test, metric = p["fitness_metric"]):
+        yPred = self.annmodel.evaluate(X_test, y_test,
+                            batch_size=ann_p["Batch size"], verbose=0)
+
+        names = self.annmodel.metrics_names
+        yPred.insert(0, yPred[names.index(metric)])
+            
+        self.yPred = yPred
+        return self.yPred
 
 ## Fitness function
 
 def fitness_function(X):
     # initiate dopamine network 
-    data = LoadData(p["inputfile"])
-    X_train, y_train, X_test, y_test = data.get_model_data()
+    X_train, y_train, X_test, y_test = LoadData().get_model_data()
     annmodel = AnnModel(X)
-    fitness = annmodel.predict(X_train, y_train, p["fitness_metric"], save=False)
+    fitness = annmodel.predict(X_train, y_train)
     if p["fitness_metric"] in ["loss", "fn", "fp"]:
         pass
     else:
