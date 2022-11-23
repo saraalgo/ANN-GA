@@ -24,6 +24,7 @@ class GA_ANN():
                 timeout = p["timeout"],
                 fitness_function = fitness_function):
 
+        data, X, y = LoadData().get_data()
         X_train, y_train, X_test, y_test = LoadData().get_model_data()
 
         # 1. Calculate varbound for our ann network
@@ -45,6 +46,16 @@ class GA_ANN():
                    algorithm_parameters=ga_p)
 
         self.model = model.run(callbacks=[Callbacks.SavePopulation_bests()], seed = None, no_plot = True)
+        self.data = data
+        self.X = X
+        self.y = y
+        self.X_train = X_train
+        self.y_train = y_train
+        self.X_test = X_test
+        self.y_test = y_test
+
+    def get_data(self):
+        return self.data, self.X, self.y, self.X_train, self.y_train, self.X_test, self.y_test
 
     def get_result(self):
         return self.model
