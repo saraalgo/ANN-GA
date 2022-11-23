@@ -25,8 +25,10 @@ METRICS = [
       tf.keras.metrics.AUC(name='prc', curve='PR'), # precision-recall curve
 ]
 
-if ann_p["Output layer"] == 1:
+if ann_p["Output layer"] == 1 and ann_p["Loss"] == "binary_crossentropy":
     METRICS.append(tf.keras.metrics.BinaryAccuracy(name='accuracy'))
+elif ann_p["Output layer"] == 1 and ann_p["Loss"] == "mse":
+    METRICS.append(tf.keras.metrics.Accuracy(name='accuracy'))    
 else:
     METRICS.append(tf.keras.metrics.CategoricalAccuracy(name='accuracy'))
 
