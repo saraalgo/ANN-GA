@@ -25,8 +25,10 @@ METRICS = [
       tf.keras.metrics.AUC(name='prc', curve='PR'), # precision-recall curve
 ]
 
-if ann_p["Output layer"] == 1:
+if ann_p["Output layer"] == 1 and ann_p["Loss"] == "binary_crossentropy":
     METRICS.append(tf.keras.metrics.BinaryAccuracy(name='accuracy'))
+elif ann_p["Output layer"] == 1 and ann_p["Loss"] == "mse":
+    METRICS.append(tf.keras.metrics.Accuracy(name='accuracy'))    
 else:
     METRICS.append(tf.keras.metrics.CategoricalAccuracy(name='accuracy'))
 
@@ -88,7 +90,7 @@ class LoadData():
         self.y_test = y_test
 
     def get_data(self):
-        return self.data, self.X, self.y, self.X_train, self.y_train, self.X_test, self.y_test
+        return self.data, self.X, self.y
 
     def get_model_data(self):
         return self.X_train, self.y_train, self.X_test, self.y_test
@@ -136,10 +138,10 @@ class AnnModel():
     
     def predict(self, X_train, y_train, metric = p["fitness_metric"], save="../results/" + p["input_name"]):
         yPred = self.annmodel.evaluate(X_train, y_train,
-                              batch_size=ann_p["Batch size"], verbose=0)
+                              batch_size=ann_p["Batch size"], verbose=ann_p["Verbose"])
         yPred.insert(0, y_train.tolist())
         y_pred_prob = self.annmodel.predict(X_train, 
-                                   batch_size=ann_p["Batch size"], verbose=0)
+                                   batch_size=ann_p["Batch size"], verbose=ann_p["Verbose"])
         yPred.insert(0, y_pred_prob.ravel())
         names = ['y_pred_prob','y_real']+self.annmodel.metrics_names
 
@@ -166,7 +168,7 @@ class AnnModel():
 
     def predict_test(self, X_test, y_test, metric = p["fitness_metric"]):
         yPred = self.annmodel.evaluate(X_test, y_test,
-                            batch_size=ann_p["Batch size"], verbose=0)
+                            batch_size=ann_p["Batch size"], verbose=ann_p["Verbose"])
 
         names = self.annmodel.metrics_names
         yPred.insert(0, yPred[names.index(metric)])
