@@ -22,7 +22,7 @@ git clone https://github.com/saraalgo/ANN-GA.git
 2. Create and activate python environment if you do not count with the beforehand mentioned Python version. Otherwise, you could skip this step.
 
 ```sh
-python3.7.9 -m venv DopANAN/
+python3.7.9 -m venv ANN-GA/
 source bin/activate
 ```
 
@@ -34,12 +34,14 @@ python -m pip install -r requirements.txt
 
 ## Project workflow
 
-In params.py
-First define params
-Then ga_params
-Finally ann_params
-
-Then use run script 
+1. In *params.py*:
+  - First define **params**
+  - Then **ga_params**
+  - Finally **ann_params**
+2. Run the the final function defined in *ga_ann.py*:
+```python
+model = GA_ANN()
+```
 
 ### Input Data format
 
